@@ -7,7 +7,7 @@ db.employees.aggregate([
   { $limit: 1 },
 ]);
 
-//Group by department and sum the salaries
+//Group by department and sum  the salaries
 db.employees.aggregate([
   { $group: { _id: "$department", total: { $sum: "$salary" } } },
 ]);
