@@ -56,3 +56,82 @@ db.orders.aggregate([
     }
   }
 ]);
+
+//
+//Get Employee Names and Their Orders' Values
+db.employees.aggregate([
+  {
+    $lookup: {
+      from: "orders",
+      localField: "_id",
+      foreignField: "empId",
+      as: "Ord",
+    },
+  },
+  { $project: { name: 1, "Ord.orderValue": 1 } },
+]);
+
+//Same as above but with $unwind for one order per result
+db.employees.aggregate([
+  {
+    $lookup: {
+      from: "orders",
+      localField: "_id",
+      foreignField: "empId",
+      as: "Ord",
+    },
+  },
+  { $unwind: "$Ord" },
+  { $project: { name: 1, "Ord.orderValue": 1 } },
+]);
+
+//Join employees with both orders and address
+db.employees.aggregate([
+  {
+    $lookup: {
+      from: "orders",
+      localField: "_id",
+      foreignField: "empId",
+      as: "Ord",
+    },
+  },
+  {
+    $lookup: {
+      from: "address",
+      localField: "_id",
+      foreignField: "empId",
+      as: "Addr",
+    },
+  },
+]);
+
+//Get Chastity’s Order and Address Info
+db.employees.aggregate([
+  { $match: { email: "chastity@gmail.com" } },
+  {
+    $lookup: {
+      from: "orders",
+      localField: "_id",
+      foreignField: "empId",
+      as: "Ord",
+    },
+  },
+  { $unwind: "$Ord" },
+  {
+    $lookup: {
+      from: "address",
+      localField: "_id",
+      foreignField: "empId",
+      as: "Addr",
+    },
+  },
+  {
+    $project: {
+      _id: 0,
+      name: 1,
+      "Addr.residence.city": 1,
+      "Ord.orderValue": 1,
+      "Ord.status": 1,
+    },
+  },
+]);
